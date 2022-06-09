@@ -1,6 +1,10 @@
 /* This is free and unencumbered software released into the public domain. */
 
+// ignore_for_file: undefined_prefixed_name
+
+import 'dart:html';
 import 'dart:js' as js;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -8,8 +12,6 @@ import 'package:model_viewer_plus/src/model_viewer_controller.dart';
 
 import 'html_builder.dart';
 import 'model_viewer_plus.dart';
-import 'shim/dart_html_fake.dart' if (dart.library.html) 'dart:html';
-import 'shim/dart_ui_fake.dart' if (dart.library.html) 'dart:ui' as ui;
 
 class ModelViewerState extends State<ModelViewer> {
   bool _isLoading = true;
@@ -18,9 +20,6 @@ class ModelViewerState extends State<ModelViewer> {
   void initState() {
     super.initState();
     generateModelViewerHtml();
-    Future.microtask(() {
-      widget.onCreated?.call(_ModelViewerController());
-    });
   }
 
   /// To generate the HTML code for using the model viewer.
@@ -32,8 +31,8 @@ class ModelViewerState extends State<ModelViewer> {
       ..allowElement('meta',
           attributes: ['name', 'content'], uriPolicy: _AllowUriPolicy())
       ..allowElement('style')
-      // ..allowElement('script',
-      //     attributes: ['src', 'type', 'defer'], uriPolicy: _AllowUriPolicy())
+      ..allowElement('script',
+          attributes: ['src', 'type', 'defer'], uriPolicy: _AllowUriPolicy())
       ..allowCustomElement('model-viewer',
           attributes: [
             'style',
@@ -109,7 +108,7 @@ class ModelViewerState extends State<ModelViewer> {
         ..style.width = '100%'
         ..setInnerHtml(
           html,
-         validator: _validator,
+          validator: _validator,
         ),
     );
 
@@ -136,7 +135,12 @@ class ModelViewerState extends State<ModelViewer> {
             child: CircularProgressIndicator(
             semanticsLabel: 'Loading Model Viewer...',
           ))
-        : HtmlElementView(viewType: 'model-viewer-html');
+        : HtmlElementView(
+            viewType: 'model-viewer-html',
+            onPlatformViewCreated: (id) {
+              widget.onCreated?.call(_ModelViewerController());
+            },
+          );
   }
 
   String _buildHTML(final String htmlTemplate) {

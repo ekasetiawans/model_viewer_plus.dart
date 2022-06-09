@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
             Expanded(
               child: ModelViewer(
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-                src: 'assets/single_3D.glb', // a bundled asset file
+                src: 'assets/Astronaut.glb', // a bundled asset file
                 alt: "A 3D model of an astronaut",
                 ar: true,
                 arModes: ['scene-viewer', 'webxr', 'quick-look'],
