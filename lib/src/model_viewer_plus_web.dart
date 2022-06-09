@@ -1,14 +1,15 @@
 /* This is free and unencumbered software released into the public domain. */
 
+import 'dart:js' as js;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:model_viewer_plus/src/model_viewer_controller.dart';
 
 import 'html_builder.dart';
-
-import 'shim/dart_ui_fake.dart' if (dart.library.html) 'dart:ui' as ui;
-import 'shim/dart_html_fake.dart' if (dart.library.html) 'dart:html';
-
 import 'model_viewer_plus.dart';
+import 'shim/dart_html_fake.dart' if (dart.library.html) 'dart:html';
+import 'shim/dart_ui_fake.dart' if (dart.library.html) 'dart:ui' as ui;
 
 class ModelViewerState extends State<ModelViewer> {
   bool _isLoading = true;
@@ -17,6 +18,9 @@ class ModelViewerState extends State<ModelViewer> {
   void initState() {
     super.initState();
     generateModelViewerHtml();
+    Future.microtask(() {
+      widget.onCreated?.call(_ModelViewerController());
+    });
   }
 
   /// To generate the HTML code for using the model viewer.
@@ -98,12 +102,16 @@ class ModelViewerState extends State<ModelViewer> {
     // print(html); // DEBUG
 
     ui.platformViewRegistry.registerViewFactory(
-        'model-viewer-html',
-        (int viewId) => HtmlHtmlElement()
-          ..style.border = 'none'
-          ..style.height = '100%'
-          ..style.width = '100%'
-          ..setInnerHtml(html, validator: _validator));
+      'model-viewer-html',
+      (int viewId) => HtmlHtmlElement()
+        ..style.border = 'none'
+        ..style.height = '100%'
+        ..style.width = '100%'
+        ..setInnerHtml(
+          html,
+         validator: _validator,
+        ),
+    );
 
     setState(() {
       _isLoading = false;
@@ -215,5 +223,12 @@ class _AllowUriPolicy implements UriPolicy {
   @override
   bool allowsUri(String uri) {
     return true;
+  }
+}
+
+class _ModelViewerController implements ModelViewerController {
+  @override
+  Future<void> runJavascript(String method, List<dynamic> args) async {
+    js.context.callMethod(method, args);
   }
 }

@@ -5,21 +5,86 @@ import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
+const relatedJs = '''
+  function updateColorRGBA(colorString) {
+    if (!colorString) {
+      return;
+    }
+
+    const color = colorString.substring(5, colorString.length - 1)
+      .replace(/ /g, '')
+      .split(',')
+      .map(numberString => parseFloat(numberString));
+
+    updateColor(color);
+  }
+
+  function updateColor(color) {
+    const modelViewerColor = document.querySelector("model-viewer#model");
+
+    const [material] = modelViewerColor.model.materials;
+    material.pbrMetallicRoughness.setBaseColorFactor(color);
+  }
+''';
+
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ModelViewerController _controller;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("Model Viewer")),
-        body: ModelViewer(
-          backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-          src: 'assets/Astronaut.glb', // a bundled asset file
-          alt: "A 3D model of an astronaut",
-          ar: true,
-          arModes: ['scene-viewer', 'webxr', 'quick-look'],
-          autoRotate: true,
-          cameraControls: true,
-          iosSrc: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ModelViewer(
+                backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
+                src: 'assets/single_3D.glb', // a bundled asset file
+                alt: "A 3D model of an astronaut",
+                ar: true,
+                arModes: ['scene-viewer', 'webxr', 'quick-look'],
+                autoRotate: true,
+                cameraControls: true,
+                id: 'model',
+                relatedJs: relatedJs,
+                onCreated: (controller) {
+                  _controller = controller;
+                },
+              ),
+            ),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _controller
+                        .runJavascript('updateColorRGBA', ['rgba(1,0,0,1)']);
+                  },
+                  child: Text('RED'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _controller
+                        .runJavascript('updateColorRGBA', ['rgba(0,1,0,1)']);
+                  },
+                  child: Text('GREEN'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _controller
+                        .runJavascript('updateColorRGBA', ['rgba(0,0,1,1)']);
+                  },
+                  child: Text('BLUE'),
+                ),
+              ],
+            )
+          ],
         ),
       ),
     );

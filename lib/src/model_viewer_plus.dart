@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:model_viewer_plus/src/model_viewer_controller.dart';
 
 import 'model_viewer_plus_stub.dart'
     if (dart.library.io) 'model_viewer_plus_mobile.dart'
     if (dart.library.js) 'model_viewer_plus_web.dart';
 
 enum Loading { auto, lazy, eager }
+
 enum Reveal { auto, interaction, manual }
+
 enum ArScale { auto, fixed }
+
 enum ArPlacement { floor, wall }
+
 enum TouchAction { panY, panX, none }
+
 enum InteractionPolicy { allowWhenFocused, alwaysAllow }
+
 enum InteractionPrompt { auto, whenFocused, none }
+
 enum InteractionPromptStyle { wiggle, basic }
+
 enum Bounds { tight, legacy }
 
 /// Flutter widget for rendering interactive 3D models.
@@ -72,6 +80,7 @@ class ModelViewer extends StatefulWidget {
     this.relatedCss,
     this.relatedJs,
     this.id,
+    this.onCreated,
   }) : super(key: key);
 
   // Loading Attributes
@@ -565,6 +574,8 @@ class ModelViewer extends StatefulWidget {
 
   /// The id of the [ModelViewer] in HTML.
   final String? id;
+
+  final void Function(ModelViewerController controller)? onCreated;
 
   @override
   State<ModelViewer> createState() => ModelViewerState();

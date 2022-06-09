@@ -10,4 +10,5 @@
 ///    for the web component this widget embeds.
 library model_viewer_plus;
 
+export 'src/model_viewer_controller.dart';
 export 'src/model_viewer_plus.dart';

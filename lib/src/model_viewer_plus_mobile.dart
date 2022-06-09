@@ -5,19 +5,18 @@ import 'dart:convert' show utf8;
 import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
 import 'dart:typed_data' show Uint8List;
+
+import 'package:android_intent_plus/android_intent.dart' as android_content;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:path/path.dart' as p;
-
-import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:android_intent_plus/android_intent.dart' as android_content;
+import 'package:model_viewer_plus/src/model_viewer_controller.dart';
+import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'html_builder.dart';
-
 import 'model_viewer_plus.dart';
 
 class ModelViewerState extends State<ModelViewer> {
@@ -71,6 +70,11 @@ class ModelViewerState extends State<ModelViewer> {
           _controller.complete(webViewController);
           print('>>>> ModelViewer initializing... <$_proxyURL>'); // DEBUG
           await webViewController.loadUrl(_proxyURL);
+          widget.onCreated?.call(
+            _ModelViewerControllerImpl(
+              webViewController: webViewController,
+            ),
+          );
         },
         navigationDelegate: (final NavigationRequest navigation) async {
           print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
@@ -330,5 +334,17 @@ class ModelViewerState extends State<ModelViewer> {
 
   Future<Uint8List> _readFile(final String path) async {
     return await File(path).readAsBytes();
+  }
+}
+
+class _ModelViewerControllerImpl implements ModelViewerController {
+  final WebViewController webViewController;
+  _ModelViewerControllerImpl({
+    required this.webViewController,
+  });
+
+  @override
+  Future<void> runJavascript(String method, List<dynamic> arguments) {
+    return webViewController.runJavascript('$method("${arguments.join(',')}")');
   }
 }
