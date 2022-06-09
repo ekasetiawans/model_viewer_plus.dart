@@ -46,7 +46,10 @@ class _MyAppState extends State<MyApp> {
             Expanded(
               child: ModelViewer(
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-                src: 'assets/Astronaut.glb', // a bundled asset file
+                src:
+                    'https://raw.githubusercontent.com/omchiii/model_viewer_plus.dart/master/example/assets/Astronaut.glb', // a bundled asset file
+                iosSrc:
+                    'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
                 alt: "A 3D model of an astronaut",
                 ar: true,
                 arModes: ['scene-viewer', 'webxr', 'quick-look'],
