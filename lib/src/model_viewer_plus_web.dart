@@ -2,6 +2,7 @@
 
 // ignore_for_file: undefined_prefixed_name
 
+import 'dart:convert';
 import 'dart:html';
 import 'dart:js' as js;
 import 'dart:ui' as ui;
@@ -96,10 +97,6 @@ class ModelViewerState extends State<ModelViewer> {
           ],
           uriPolicy: _AllowUriPolicy());
 
-    final html = _buildHTML(htmlTemplate);
-
-    // print(html); // DEBUG
-
     ui.platformViewRegistry.registerViewFactory(
       'model-viewer-html',
       (int viewId) => HtmlHtmlElement()
@@ -107,7 +104,7 @@ class ModelViewerState extends State<ModelViewer> {
         ..style.height = '100%'
         ..style.width = '100%'
         ..setInnerHtml(
-          html,
+          _buildHTML(htmlTemplate, viewId.toString()),
           validator: _validator,
         ),
     );
@@ -138,12 +135,29 @@ class ModelViewerState extends State<ModelViewer> {
         : HtmlElementView(
             viewType: 'model-viewer-html',
             onPlatformViewCreated: (id) {
-              widget.onCreated?.call(_ModelViewerController());
+              final modelViewer =
+                  window.document.getElementById('${widget.id}-$id');
+              if (modelViewer == null) return;
+
+              modelViewer.addEventListener(
+                'load',
+                (event) {
+                  final result = js.context.callMethod('getMaterials');
+                  final materials = (json.decode(result) as List)
+                      .cast<String>()
+                      .toSet()
+                      .toList();
+
+                  widget.onCreated?.call(_ModelViewerController(
+                    materials: materials,
+                  ));
+                },
+              );
             },
           );
   }
 
-  String _buildHTML(final String htmlTemplate) {
+  String _buildHTML(final String htmlTemplate, String viewId) {
     if (widget.src.startsWith('file://')) {
       // Local file URL can't be used in Flutter web.
       debugPrint("file:// URL scheme can't be used in Flutter web.");
@@ -217,9 +231,31 @@ class ModelViewerState extends State<ModelViewer> {
       // Others
       innerModelViewerHtml: widget.innerModelViewerHtml,
       relatedCss: widget.relatedCss,
-      relatedJs: widget.relatedJs,
-      id: widget.id,
+      relatedJs: _relatedJS(viewId),
+      id: '${widget.id}-$viewId',
     );
+  }
+
+  String _relatedJS(String viewId) {
+    return '''
+  const modelViewer = document.querySelector("model-viewer#${widget.id}-$viewId");
+
+  function updateMaterialColor(name, colorString) {
+    const color = JSON.parse(colorString);
+    const material = modelViewer.model.getMaterialByName(name);
+    if (material){
+      material.pbrMetallicRoughness.setBaseColorFactor(color);
+    }
+  }
+
+  function getMaterials() {
+    const materials = modelViewer.model.materials;
+    const result = JSON.stringify(materials.map(material => material.name));
+    return result;
+  }
+
+  ${widget.relatedJs}
+''';
   }
 }
 
@@ -232,7 +268,24 @@ class _AllowUriPolicy implements UriPolicy {
 
 class _ModelViewerController implements ModelViewerController {
   @override
-  Future<void> runJavascript(String method, List<dynamic> args) async {
-    js.context.callMethod(method, args);
+  final List<String> materials;
+
+  _ModelViewerController({
+    required this.materials,
+  });
+
+  @override
+  Future<void> changeColor(String materialName, ui.Color color) async {
+    final colors = <double>[
+      color.red / 256,
+      color.green / 256,
+      color.blue / 256,
+      color.alpha / 256,
+    ];
+
+    js.context.callMethod('updateMaterialColor', [
+      materialName,
+      json.encode(colors),
+    ]);
   }
 }

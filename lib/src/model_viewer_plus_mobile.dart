@@ -1,7 +1,7 @@
 /* This is free and unencumbered software released into the public domain. */
 
 import 'dart:async' show Completer;
-import 'dart:convert' show utf8;
+import 'dart:convert' show json, utf8;
 import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
 import 'dart:typed_data' show Uint8List;
@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:model_viewer_plus/src/model_viewer_controller.dart';
 import 'package:path/path.dart' as p;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'html_builder.dart';
@@ -67,22 +67,34 @@ class ModelViewerState extends State<ModelViewer> {
           ),
         },
         onWebViewCreated: (final WebViewController webViewController) async {
-          _controller.complete(webViewController);
           print('>>>> ModelViewer initializing... <$_proxyURL>'); // DEBUG
           await webViewController.loadUrl(_proxyURL);
-          widget.onCreated?.call(
-            _ModelViewerControllerImpl(
-              webViewController: webViewController,
-            ),
-          );
+          _controller.complete(webViewController);
+        },
+        javascriptChannels: {
+          JavascriptChannel(
+            name: 'OnLoadedEvent',
+            onMessageReceived: (s) async {
+              final webViewController = await _controller.future;
+              final result = await webViewController
+                  .runJavascriptReturningResult('getMaterials()');
+
+              final materials =
+                  (json.decode(result) as List).cast<String>().toSet().toList();
+              final controller = _ModelViewerControllerImpl(
+                materials: materials,
+                webViewController: webViewController,
+              );
+              widget.onCreated?.call(controller);
+            },
+          ),
         },
         navigationDelegate: (final NavigationRequest navigation) async {
           print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
           if (!Platform.isAndroid) {
             if (Platform.isIOS && navigation.url == widget.iosSrc) {
-              await launch(
+              await launchUrlString(
                 navigation.url,
-                forceSafariVC: true,
               );
               return NavigationDecision.prevent;
             }
@@ -223,9 +235,33 @@ class ModelViewerState extends State<ModelViewer> {
       // Others
       innerModelViewerHtml: widget.innerModelViewerHtml,
       relatedCss: widget.relatedCss,
-      relatedJs: widget.relatedJs,
+      relatedJs: _relatedJs(),
       id: widget.id,
     );
+  }
+
+  String _relatedJs() {
+    return '''
+  const modelViewerColor = document.querySelector("model-viewer#${widget.id}");
+  modelViewerColor.addEventListener('load', function () {
+      OnLoadedEvent.postMessage(true);
+  });
+
+  function updateMaterialColor(name, color) {
+    const material = modelViewerColor.model.getMaterialByName(name);
+    if (material){
+      material.pbrMetallicRoughness.setBaseColorFactor(color);
+    }
+  }
+
+  function getMaterials() {
+    const materials = modelViewerColor.model.materials;
+    const result = JSON.stringify(materials.map(material => material.name));
+    return result;
+  }
+
+  ${widget.relatedJs}
+  ''';
   }
 
   Future<void> _initProxy() async {
@@ -339,12 +375,24 @@ class ModelViewerState extends State<ModelViewer> {
 
 class _ModelViewerControllerImpl implements ModelViewerController {
   final WebViewController webViewController;
+
+  @override
+  final List<String> materials;
+
   _ModelViewerControllerImpl({
     required this.webViewController,
+    required this.materials,
   });
 
   @override
-  Future<void> runJavascript(String method, List<dynamic> arguments) {
-    return webViewController.runJavascript('$method("${arguments.join(',')}")');
+  Future<void> changeColor(String materialName, Color color) async {
+    final colorString = [
+      color.red / 256,
+      color.green / 256,
+      color.blue / 256,
+      color.alpha / 256,
+    ];
+    await webViewController.runJavascriptReturningResult(
+        'updateMaterialColor("$materialName", $colorString)');
   }
 }

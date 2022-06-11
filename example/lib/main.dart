@@ -5,35 +5,14 @@ import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 void main() => runApp(MyApp());
 
-const relatedJs = '''
-  function updateColorRGBA(colorString) {
-    if (!colorString) {
-      return;
-    }
-
-    const color = colorString.substring(5, colorString.length - 1)
-      .replace(/ /g, '')
-      .split(',')
-      .map(numberString => parseFloat(numberString));
-
-    updateColor(color);
-  }
-
-  function updateColor(color) {
-    const modelViewerColor = document.querySelector("model-viewer#model");
-
-    const [material] = modelViewerColor.model.materials;
-    material.pbrMetallicRoughness.setBaseColorFactor(color);
-  }
-''';
-
 class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  ModelViewerController _controller;
+  ModelViewerController? _controller;
+  String? _selectedMaterial;
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +25,7 @@ class _MyAppState extends State<MyApp> {
             Expanded(
               child: ModelViewer(
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-                src:
-                    'https://raw.githubusercontent.com/omchiii/model_viewer_plus.dart/master/example/assets/Astronaut.glb', // a bundled asset file
+                src: 'assets/Astronaut.glb', // a bundled asset file
                 iosSrc:
                     'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
                 alt: "A 3D model of an astronaut",
@@ -56,34 +34,63 @@ class _MyAppState extends State<MyApp> {
                 autoRotate: true,
                 cameraControls: true,
                 id: 'model',
-                relatedJs: relatedJs,
+
                 onCreated: (controller) {
-                  _controller = controller;
+                  setState(() {
+                    _controller = controller;
+                  });
                 },
               ),
             ),
-            Row(
+            Column(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _controller
-                        .runJavascript('updateColorRGBA', ['rgba(1,0,0,1)']);
-                  },
-                  child: Text('RED'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller
-                        .runJavascript('updateColorRGBA', ['rgba(0,1,0,1)']);
-                  },
-                  child: Text('GREEN'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _controller
-                        .runJavascript('updateColorRGBA', ['rgba(0,0,1,1)']);
-                  },
-                  child: Text('BLUE'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: _selectedMaterial,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedMaterial = value;
+                          });
+                        },
+                        items: _controller?.materials.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList() ??
+                            [],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _controller?.changeColor(
+                          _selectedMaterial!,
+                          Colors.red,
+                        );
+                      },
+                      child: Text('RED'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _controller?.changeColor(
+                          _selectedMaterial!,
+                          Colors.green,
+                        );
+                      },
+                      child: Text('GREEN'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _controller?.changeColor(
+                          _selectedMaterial!,
+                          Colors.blue,
+                        );
+                      },
+                      child: Text('BLUE'),
+                    ),
+                  ],
                 ),
               ],
             )

@@ -1,3 +1,6 @@
+import 'dart:ui';
+
 abstract class ModelViewerController {
-  Future<void> runJavascript(String method, List<dynamic> arguments);
+  Future<void> changeColor(String materialName, Color color);
+  List<String> get materials;
 }
