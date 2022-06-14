@@ -132,8 +132,7 @@ class ModelViewerState extends State<ModelViewer> {
         : HtmlElementView(
             viewType: 'model-viewer-html-$variableName',
             onPlatformViewCreated: (id) {
-              final modelViewer =
-                  window.document.getElementById('${widget.id}-$id');
+              final modelViewer = window.document.getElementById(variableName);
               if (modelViewer == null) return;
 
               modelViewer.addEventListener(
