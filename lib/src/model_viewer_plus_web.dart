@@ -101,7 +101,7 @@ class ModelViewerState extends State<ModelViewer> {
           uriPolicy: _AllowUriPolicy());
 
     ui.platformViewRegistry.registerViewFactory(
-      'model-viewer-html',
+      'model-viewer-html-$variableName',
       (int viewId) => HtmlHtmlElement()
         ..style.border = 'none'
         ..style.height = '100%'
@@ -136,7 +136,7 @@ class ModelViewerState extends State<ModelViewer> {
             semanticsLabel: 'Loading Model Viewer...',
           ))
         : HtmlElementView(
-            viewType: 'model-viewer-html',
+            viewType: 'model-viewer-html-$variableName',
             onPlatformViewCreated: (id) {
               final modelViewer =
                   window.document.getElementById('${widget.id}-$id');
