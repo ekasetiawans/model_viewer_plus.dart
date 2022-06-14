@@ -237,19 +237,21 @@ class ModelViewerState extends State<ModelViewer> {
   }
 
   String _relatedJS(String viewId) {
+    final varName = 'mv${DateTime.now().millisecondsSinceEpoch}';
+
     return '''
-  const modelViewer = document.querySelector("model-viewer#${widget.id}-$viewId");
+  const $varName = document.querySelector("model-viewer#${widget.id}-$viewId");
 
   function updateMaterialColor(name, colorString) {
     const color = JSON.parse(colorString);
-    const material = modelViewer.model.getMaterialByName(name);
+    const material = $varName.model.getMaterialByName(name);
     if (material){
       material.pbrMetallicRoughness.setBaseColorFactor(color);
     }
   }
 
   function getMaterials() {
-    const materials = modelViewer.model.materials;
+    const materials = $varName.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
   }
