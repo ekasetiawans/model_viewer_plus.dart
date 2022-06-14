@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:html';
 import 'dart:js' as js;
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ import 'package:model_viewer_plus/src/model_viewer_controller.dart';
 
 import 'html_builder.dart';
 import 'model_viewer_plus.dart';
+
+final _random = math.Random();
 
 class ModelViewerState extends State<ModelViewer> {
   bool _isLoading = true;
@@ -143,14 +146,14 @@ class ModelViewerState extends State<ModelViewer> {
                 'load',
                 (event) {
                   final result =
-                      js.context.callMethod('getMaterials_$_jsVarName');
+                      js.context.callMethod('getMaterials_$variableName');
                   final materials = (json.decode(result) as List)
                       .cast<String>()
                       .toSet()
                       .toList();
 
                   widget.onCreated?.call(_ModelViewerController(
-                      materials: materials, varName: _jsVarName));
+                      materials: materials, varName: variableName));
                 },
               );
             },
@@ -236,24 +239,29 @@ class ModelViewerState extends State<ModelViewer> {
     );
   }
 
-  final String _jsVarName = 'mv${DateTime.now().microsecondsSinceEpoch}';
+  String _createVariableName() {
+    return 'modelViewer${_random.nextInt(10000000)}';
+  }
+
+  String? _variableName;
+  String get variableName {
+    return _variableName ??= _createVariableName();
+  }
 
   String _relatedJS(String viewId) {
-    final varName = _jsVarName;
-
     return '''
-  const $varName = document.querySelector("model-viewer#${widget.id}-$viewId");
+  const $variableName = document.querySelector("model-viewer#${widget.id}-$viewId");
 
-  function updateMaterialColor_$varName(name, colorString) {
+  function updateMaterialColor_$variableName(name, colorString) {
     const color = JSON.parse(colorString);
-    const material = $varName.model.getMaterialByName(name);
+    const material = $variableName.model.getMaterialByName(name);
     if (material){
       material.pbrMetallicRoughness.setBaseColorFactor(color);
     }
   }
 
-  function getMaterials_$varName() {
-    const materials = $varName.model.materials;
+  function getMaterials_$variableName() {
+    const materials = $variableName.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
   }

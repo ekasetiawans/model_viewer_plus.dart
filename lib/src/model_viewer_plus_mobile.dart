@@ -4,6 +4,7 @@ import 'dart:async' show Completer;
 import 'dart:convert' show json, utf8;
 import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
+import 'dart:math' as math;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:android_intent_plus/android_intent.dart' as android_content;
@@ -18,6 +19,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import 'html_builder.dart';
 import 'model_viewer_plus.dart';
+
+final _random = math.Random();
 
 class ModelViewerState extends State<ModelViewer> {
   final Completer<WebViewController> _controller =
@@ -240,26 +243,31 @@ class ModelViewerState extends State<ModelViewer> {
     );
   }
 
-  final String _jsVarName = 'mv${DateTime.now().microsecondsSinceEpoch}';
+  String _createVariableName() {
+    return 'modelViewer${_random.nextInt(10000000)}';
+  }
+
+  String? _variableName;
+  String get variableName {
+    return _variableName ??= _createVariableName();
+  }
 
   String _relatedJs() {
-    final varName = _jsVarName;
-
     return '''
-  const $varName = document.querySelector("model-viewer#${widget.id}");
-  $varName.addEventListener('load', function () {
+  const $variableName = document.querySelector("model-viewer#${widget.id}");
+  $variableName.addEventListener('load', function () {
       OnLoadedEvent.postMessage(true);
   });
 
   function updateMaterialColor(name, color) {
-    const material = $varName.model.getMaterialByName(name);
+    const material = $variableName.model.getMaterialByName(name);
     if (material){
       material.pbrMetallicRoughness.setBaseColorFactor(color);
     }
   }
 
   function getMaterials() {
-    const materials = $varName.model.materials;
+    const materials = $variableName.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
   }
