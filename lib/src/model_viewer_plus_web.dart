@@ -101,7 +101,7 @@ class ModelViewerState extends State<ModelViewer> {
           uriPolicy: _AllowUriPolicy());
 
     ui.platformViewRegistry.registerViewFactory(
-      'model-viewer-html',
+      'model-viewer-html-$variableName',
       (int viewId) => HtmlHtmlElement()
         ..style.border = 'none'
         ..style.height = '100%'
@@ -123,12 +123,6 @@ class ModelViewerState extends State<ModelViewer> {
   }
 
   @override
-  void didUpdateWidget(final ModelViewer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // TODO
-  }
-
-  @override
   Widget build(final BuildContext context) {
     return _isLoading
         ? Center(
@@ -136,7 +130,7 @@ class ModelViewerState extends State<ModelViewer> {
             semanticsLabel: 'Loading Model Viewer...',
           ))
         : HtmlElementView(
-            viewType: 'model-viewer-html',
+            viewType: 'model-viewer-html-$variableName',
             onPlatformViewCreated: (id) {
               final modelViewer =
                   window.document.getElementById('${widget.id}-$id');
@@ -147,6 +141,7 @@ class ModelViewerState extends State<ModelViewer> {
                 (event) {
                   final result = js.context
                       .callMethod('getMaterials_$variableName', [variableName]);
+
                   final materials = (json.decode(result) as List)
                       .cast<String>()
                       .toSet()
