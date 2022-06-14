@@ -142,16 +142,15 @@ class ModelViewerState extends State<ModelViewer> {
               modelViewer.addEventListener(
                 'load',
                 (event) {
-                  final result = js.context.callMethod('getMaterials');
+                  final result =
+                      js.context.callMethod('getMaterials_$_jsVarName');
                   final materials = (json.decode(result) as List)
                       .cast<String>()
                       .toSet()
                       .toList();
 
                   widget.onCreated?.call(_ModelViewerController(
-                    materials: materials,
-                    varName: _jsVarName
-                  ));
+                      materials: materials, varName: _jsVarName));
                 },
               );
             },
@@ -245,7 +244,7 @@ class ModelViewerState extends State<ModelViewer> {
     return '''
   const $varName = document.querySelector("model-viewer#${widget.id}-$viewId");
 
-  function updateMaterialColor$varName(name, colorString) {
+  function updateMaterialColor_$varName(name, colorString) {
     const color = JSON.parse(colorString);
     const material = $varName.model.getMaterialByName(name);
     if (material){
@@ -253,7 +252,7 @@ class ModelViewerState extends State<ModelViewer> {
     }
   }
 
-  function getMaterials$varName() {
+  function getMaterials_$varName() {
     const materials = $varName.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
@@ -291,7 +290,7 @@ class _ModelViewerController implements ModelViewerController {
       color.alpha / 256,
     ];
 
-    js.context.callMethod('updateMaterialColor$varName', [
+    js.context.callMethod('updateMaterialColor_$varName', [
       materialName,
       json.encode(colors),
     ]);
