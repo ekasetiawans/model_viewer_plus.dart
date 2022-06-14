@@ -101,7 +101,7 @@ class ModelViewerState extends State<ModelViewer> {
           uriPolicy: _AllowUriPolicy());
 
     ui.platformViewRegistry.registerViewFactory(
-      'model-viewer-html-$variableName',
+      'model-viewer-html',
       (int viewId) => HtmlHtmlElement()
         ..style.border = 'none'
         ..style.height = '100%'
@@ -136,7 +136,7 @@ class ModelViewerState extends State<ModelViewer> {
             semanticsLabel: 'Loading Model Viewer...',
           ))
         : HtmlElementView(
-            viewType: 'model-viewer-html-$variableName',
+            viewType: 'model-viewer-html',
             onPlatformViewCreated: (id) {
               final modelViewer =
                   window.document.getElementById('${widget.id}-$id');
@@ -145,15 +145,19 @@ class ModelViewerState extends State<ModelViewer> {
               modelViewer.addEventListener(
                 'load',
                 (event) {
-                  final result =
-                      js.context.callMethod('getMaterials_$variableName');
+                  final result = js.context
+                      .callMethod('getMaterials_$variableName', [variableName]);
                   final materials = (json.decode(result) as List)
                       .cast<String>()
                       .toSet()
                       .toList();
 
-                  widget.onCreated?.call(_ModelViewerController(
-                      materials: materials, varName: variableName));
+                  widget.onCreated?.call(
+                    _ModelViewerController(
+                      materials: materials,
+                      variableName: variableName,
+                    ),
+                  );
                 },
               );
             },
@@ -235,7 +239,7 @@ class ModelViewerState extends State<ModelViewer> {
       innerModelViewerHtml: widget.innerModelViewerHtml,
       relatedCss: widget.relatedCss,
       relatedJs: _relatedJS(viewId),
-      id: '${widget.id}-$viewId',
+      id: variableName,
     );
   }
 
@@ -245,23 +249,26 @@ class ModelViewerState extends State<ModelViewer> {
 
   String? _variableName;
   String get variableName {
-    return _variableName ??= _createVariableName();
+    _variableName ??= _createVariableName();
+
+    return _variableName!;
   }
 
   String _relatedJS(String viewId) {
     return '''
-  const $variableName = document.querySelector("model-viewer#${widget.id}-$viewId");
+  function updateMaterialColor_$variableName(name, materialName, colorString) {
+    const viewer = document.querySelector("model-viewer#" + name);
 
-  function updateMaterialColor_$variableName(name, colorString) {
     const color = JSON.parse(colorString);
-    const material = $variableName.model.getMaterialByName(name);
+    const material = viewer.model.getMaterialByName(materialName);
     if (material){
       material.pbrMetallicRoughness.setBaseColorFactor(color);
     }
   }
 
-  function getMaterials_$variableName() {
-    const materials = $variableName.model.materials;
+  function getMaterials_$variableName(name) {
+    const viewer = document.querySelector("model-viewer#" + name);
+    const materials = viewer.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
   }
@@ -279,14 +286,14 @@ class _AllowUriPolicy implements UriPolicy {
 }
 
 class _ModelViewerController implements ModelViewerController {
-  final String varName;
+  final String variableName;
 
   @override
   final List<String> materials;
 
   _ModelViewerController({
     required this.materials,
-    required this.varName,
+    required this.variableName,
   });
 
   @override
@@ -298,7 +305,8 @@ class _ModelViewerController implements ModelViewerController {
       color.alpha / 256,
     ];
 
-    js.context.callMethod('updateMaterialColor_$varName', [
+    js.context.callMethod('updateMaterialColor_$variableName', [
+      variableName,
       materialName,
       json.encode(colors),
     ]);
