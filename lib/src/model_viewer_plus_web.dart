@@ -150,6 +150,7 @@ class ModelViewerState extends State<ModelViewer> {
 
                   widget.onCreated?.call(_ModelViewerController(
                     materials: materials,
+                    varName: _jsVarName
                   ));
                 },
               );
@@ -236,13 +237,15 @@ class ModelViewerState extends State<ModelViewer> {
     );
   }
 
+  final String _jsVarName = 'mv${DateTime.now().microsecondsSinceEpoch}';
+
   String _relatedJS(String viewId) {
-    final varName = 'mv${DateTime.now().millisecondsSinceEpoch}';
+    final varName = _jsVarName;
 
     return '''
   const $varName = document.querySelector("model-viewer#${widget.id}-$viewId");
 
-  function updateMaterialColor(name, colorString) {
+  function updateMaterialColor$varName(name, colorString) {
     const color = JSON.parse(colorString);
     const material = $varName.model.getMaterialByName(name);
     if (material){
@@ -250,7 +253,7 @@ class ModelViewerState extends State<ModelViewer> {
     }
   }
 
-  function getMaterials() {
+  function getMaterials$varName() {
     const materials = $varName.model.materials;
     const result = JSON.stringify(materials.map(material => material.name));
     return result;
@@ -269,11 +272,14 @@ class _AllowUriPolicy implements UriPolicy {
 }
 
 class _ModelViewerController implements ModelViewerController {
+  final String varName;
+
   @override
   final List<String> materials;
 
   _ModelViewerController({
     required this.materials,
+    required this.varName,
   });
 
   @override
@@ -285,7 +291,7 @@ class _ModelViewerController implements ModelViewerController {
       color.alpha / 256,
     ];
 
-    js.context.callMethod('updateMaterialColor', [
+    js.context.callMethod('updateMaterialColor$varName', [
       materialName,
       json.encode(colors),
     ]);

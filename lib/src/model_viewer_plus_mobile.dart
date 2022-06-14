@@ -240,8 +240,10 @@ class ModelViewerState extends State<ModelViewer> {
     );
   }
 
+  final String _jsVarName = 'mv${DateTime.now().microsecondsSinceEpoch}';
+
   String _relatedJs() {
-    final varName = 'mv${DateTime.now().millisecondsSinceEpoch}';
+    final varName = _jsVarName;
 
     return '''
   const $varName = document.querySelector("model-viewer#${widget.id}");
