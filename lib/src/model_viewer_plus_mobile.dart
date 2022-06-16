@@ -103,6 +103,13 @@ class ModelViewerState extends State<ModelViewer> {
               widget.onCreated?.call(controller);
             },
           ),
+          JavascriptChannel(
+            name: 'OnProgressEvent',
+            onMessageReceived: (m) async {
+              final value = double.tryParse(m.message);
+              widget.onLoading?.call(value ?? 0);
+            },
+          ),
         },
         navigationDelegate: (final NavigationRequest navigation) async {
           print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
@@ -269,6 +276,10 @@ class ModelViewerState extends State<ModelViewer> {
   const $variableName = document.querySelector("model-viewer#${widget.id}");
   $variableName.addEventListener('load', function () {
       OnLoadedEvent.postMessage(true);
+  });
+
+  $variableName.addEventListener('progress', function (event) {
+      OnProgressEvent.postMessage(event.detail.totalProgress);
   });
 
   function updateMaterialColor(name, color) {

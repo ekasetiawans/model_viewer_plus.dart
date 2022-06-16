@@ -154,6 +154,15 @@ class ModelViewerState extends State<ModelViewer> {
                   );
                 },
               );
+
+              modelViewer.addEventListener('progress', (event) {
+                if (event is CustomEvent) {
+                  final value = event.detail.totalProgress;
+                  if (value is num) {
+                    widget.onLoading?.call(value.toDouble());
+                  }
+                }
+              });
             },
           );
   }
