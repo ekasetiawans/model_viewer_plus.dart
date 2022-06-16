@@ -81,9 +81,21 @@ class ModelViewerState extends State<ModelViewer> {
               final webViewController = await _controller.future;
               final result = await webViewController
                   .runJavascriptReturningResult('getMaterials()');
+              // on Android it will be returned as a string of string
+              // on iOS it will be returned as a string of JSON
 
-              final materials =
-                  (json.decode(result) as List).cast<String>().toSet().toList();
+              final materialJson = json.decode(result);
+              var materials = <String>[];
+
+              if (materialJson is String) {
+                final res = json.decode(materialJson);
+                if (res is List) {
+                  materials = res.cast<String>().toSet().toList();
+                }
+              } else if (materialJson is List) {
+                materials = materialJson.cast<String>().toSet().toList();
+              }
+
               final controller = _ModelViewerControllerImpl(
                 materials: materials,
                 webViewController: webViewController,
