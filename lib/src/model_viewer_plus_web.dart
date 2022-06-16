@@ -138,10 +138,18 @@ class ModelViewerState extends State<ModelViewer> {
               modelViewer.addEventListener(
                 'load',
                 (event) {
-                  final result = js.context
+                  final materialsJson = js.context
                       .callMethod('getMaterials_$variableName', [variableName]);
 
-                  final materials = (json.decode(result) as List)
+                  final materials = (json.decode(materialsJson) as List)
+                      .cast<String>()
+                      .toSet()
+                      .toList();
+
+                  final variantsJson = js.context
+                      .callMethod('getVariants_$variableName', [variableName]);
+
+                  final variants = (json.decode(variantsJson) as List)
                       .cast<String>()
                       .toSet()
                       .toList();
@@ -149,6 +157,7 @@ class ModelViewerState extends State<ModelViewer> {
                   widget.onCreated?.call(
                     _ModelViewerController(
                       materials: materials,
+                      variants: variants,
                       variableName: variableName,
                     ),
                   );
@@ -276,6 +285,18 @@ class ModelViewerState extends State<ModelViewer> {
     return result;
   }
 
+  function getVariants_$variableName(name){
+    const viewer = document.querySelector("model-viewer#" + name);
+    const names = viewer.availableVariants;
+    return JSON.stringify(names);
+  }
+
+  function setVariant_$variableName(name, variantName){
+    console.log(variantName);
+    const viewer = document.querySelector("model-viewer#" + name);
+    viewer.variantName = variantName;
+  }
+
   ${widget.relatedJs}
 ''';
   }
@@ -294,8 +315,12 @@ class _ModelViewerController implements ModelViewerController {
   @override
   final List<String> materials;
 
+  @override
+  final List<String> variants;
+
   _ModelViewerController({
     required this.materials,
+    required this.variants,
     required this.variableName,
   });
 
@@ -312,6 +337,14 @@ class _ModelViewerController implements ModelViewerController {
       variableName,
       materialName,
       json.encode(colors),
+    ]);
+  }
+
+  @override
+  Future<void> setVariant(String? variant) async {
+    js.context.callMethod('setVariant_$variableName', [
+      variableName,
+      variant,
     ]);
   }
 }

@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   ModelViewerController? _controller;
   String? _selectedMaterial;
+  String? _selectedVariant;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class _MyAppState extends State<MyApp> {
             Expanded(
               child: ModelViewer(
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-                src: 'assets/Astronaut.glb', // a bundled asset file
+                src: 'assets/MaterialsVariantsShoe.glb', // a bundled asset file
                 iosSrc:
                     'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
                 alt: "A 3D model of an astronaut",
@@ -46,7 +47,24 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                DropdownButton<String>(
+                  value: _selectedVariant,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedVariant = value;
+                      _controller?.setVariant(value);
+                    });
+                  },
+                  items: _controller?.variants.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList() ??
+                      [],
+                ),
                 Row(
                   children: [
                     Expanded(

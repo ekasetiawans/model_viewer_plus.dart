@@ -79,12 +79,12 @@ class ModelViewerState extends State<ModelViewer> {
             name: 'OnLoadedEvent',
             onMessageReceived: (s) async {
               final webViewController = await _controller.future;
-              final result = await webViewController
+              final getMaterialsResult = await webViewController
                   .runJavascriptReturningResult('getMaterials()');
               // on Android it will be returned as a string of string
               // on iOS it will be returned as a string of JSON
 
-              final materialJson = json.decode(result);
+              final materialJson = json.decode(getMaterialsResult);
               var materials = <String>[];
 
               if (materialJson is String) {
@@ -96,8 +96,24 @@ class ModelViewerState extends State<ModelViewer> {
                 materials = materialJson.cast<String>().toSet().toList();
               }
 
+              final getVariantsResult = await webViewController
+                  .runJavascriptReturningResult('getVariants()');
+
+              final variantsJson = json.decode(getVariantsResult);
+              var variants = <String>[];
+
+              if (variantsJson is String) {
+                final res = json.decode(variantsJson);
+                if (res is List) {
+                  variants = res.cast<String>().toSet().toList();
+                }
+              } else if (variantsJson is List) {
+                variants = variantsJson.cast<String>().toSet().toList();
+              }
+
               final controller = _ModelViewerControllerImpl(
                 materials: materials,
+                variants: variants,
                 webViewController: webViewController,
               );
               widget.onCreated?.call(controller);
@@ -295,6 +311,16 @@ class ModelViewerState extends State<ModelViewer> {
     return result;
   }
 
+  function getVariants() {
+    const names = $variableName.availableVariants;
+    const result = JSON.stringify(names);
+    return result;
+  }
+
+  function setVariant(variantName) {
+    $variableName.variantName = variantName;
+  }
+
   ${widget.relatedJs}
   ''';
   }
@@ -413,10 +439,13 @@ class _ModelViewerControllerImpl implements ModelViewerController {
 
   @override
   final List<String> materials;
+  @override
+  final List<String> variants;
 
   _ModelViewerControllerImpl({
     required this.webViewController,
     required this.materials,
+    required this.variants,
   });
 
   @override
@@ -429,5 +458,11 @@ class _ModelViewerControllerImpl implements ModelViewerController {
     ];
     await webViewController.runJavascriptReturningResult(
         'updateMaterialColor("$materialName", $colorString)');
+  }
+
+  @override
+  Future<void> setVariant(String? variant) async {
+    await webViewController
+        .runJavascriptReturningResult('setVariant("$variant")');
   }
 }
