@@ -91,7 +91,7 @@ abstract class HTMLBuilder {
       html.write('''
 <style>
   model-viewer#${htmlEscape.convert(id)} {
-    --poster-color: rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha});
+    --poster-color: ${posterColor.alpha == 0 ? 'transparent;' : 'rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha});'} ;
   }
 </style>''');
     }
