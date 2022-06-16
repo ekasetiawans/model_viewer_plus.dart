@@ -86,16 +86,6 @@ abstract class HTMLBuilder {
     }
 
     final html = StringBuffer(htmlTemplate);
-
-    if (posterColor != null && id != null) {
-      html.write('''
-<style>
-  model-viewer#${htmlEscape.convert(id)} {
-    --poster-color: ${posterColor.alpha == 0 ? 'transparent;' : 'rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha});'} ;
-  }
-</style>''');
-    }
-
     html.write('<model-viewer');
 
     // Attributes
@@ -393,7 +383,7 @@ abstract class HTMLBuilder {
     // --poster-color
     if (posterColor != null) {
       html.write(
-          'poster-color: rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha}); ');
+          '--poster-color: ${posterColor.alpha == 0 ? 'transparent' : 'rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha})'};');
     }
 
     // Annotations CSS
