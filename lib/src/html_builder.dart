@@ -87,6 +87,15 @@ abstract class HTMLBuilder {
 
     final html = StringBuffer(htmlTemplate);
 
+    if (posterColor != null && id != null) {
+      html.write('''
+<style>
+  model-viewer#${htmlEscape.convert(id)} {
+    --poster-color: rgba(${posterColor.red}, ${posterColor.green}, ${posterColor.blue}, ${posterColor.alpha});
+  }
+</style>''');
+    }
+
     html.write('<model-viewer');
 
     // Attributes
