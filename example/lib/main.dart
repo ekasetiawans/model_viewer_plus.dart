@@ -40,6 +40,9 @@ class _MyAppState extends State<MyApp> {
                     _controller = controller;
                   });
                 },
+                onLoading: (progress) {
+                  print(progress);
+                },
               ),
             ),
             Column(
