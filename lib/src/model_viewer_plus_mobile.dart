@@ -60,7 +60,7 @@ class ModelViewerState extends State<ModelViewer> {
       );
     } else {
       return WebView(
-        backgroundColor: Colors.transparent,
+        backgroundColor: widget.backgroundColor,
         initialUrl: null,
         javascriptMode: JavascriptMode.unrestricted,
         initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
