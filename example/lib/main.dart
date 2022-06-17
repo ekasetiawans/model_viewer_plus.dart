@@ -25,6 +25,7 @@ class _MyAppState extends State<MyApp> {
           children: [
             Expanded(
               child: ModelViewer(
+                minRenderScale: 1,
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
                 src: 'assets/MaterialsVariantsShoe.glb', // a bundled asset file
                 iosSrc:
