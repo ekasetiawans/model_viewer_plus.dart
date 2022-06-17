@@ -82,6 +82,7 @@ class ModelViewer extends StatefulWidget {
     this.id,
     this.onCreated,
     this.onLoading,
+    this.minRenderScale,
   }) : super(key: key);
 
   // Loading Attributes
@@ -575,6 +576,8 @@ class ModelViewer extends StatefulWidget {
 
   /// The id of the [ModelViewer] in HTML.
   final String? id;
+
+  final double? minRenderScale;
 
   final void Function(ModelViewerController controller)? onCreated;
   final void Function(double progress)? onLoading;

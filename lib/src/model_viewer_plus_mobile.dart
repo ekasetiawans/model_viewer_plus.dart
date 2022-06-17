@@ -79,6 +79,11 @@ class ModelViewerState extends State<ModelViewer> {
             name: 'OnLoadedEvent',
             onMessageReceived: (s) async {
               final webViewController = await _controller.future;
+              if (widget.minRenderScale != null) {
+                await webViewController.runJavascript(
+                    'setMinimumRenderScale(${widget.minRenderScale})');
+              }
+
               final getMaterialsResult = await webViewController
                   .runJavascriptReturningResult('getMaterials()');
               // on Android it will be returned as a string of string
@@ -319,6 +324,10 @@ class ModelViewerState extends State<ModelViewer> {
 
   function setVariant(variantName) {
     $variableName.variantName = variantName;
+  }
+
+  function setMinimumRenderScale(value){
+    $variableName.minimumRenderScale = value;
   }
 
   ${widget.relatedJs}

@@ -138,6 +138,14 @@ class ModelViewerState extends State<ModelViewer> {
               modelViewer.addEventListener(
                 'load',
                 (event) {
+                  if (widget.minRenderScale != null) {
+                    js.context
+                        .callMethod('setMinimumRenderScale_$variableName', [
+                      variableName,
+                      widget.minRenderScale,
+                    ]);
+                  }
+
                   final materialsJson = js.context
                       .callMethod('getMaterials_$variableName', [variableName]);
 
@@ -295,6 +303,11 @@ class ModelViewerState extends State<ModelViewer> {
     console.log(variantName);
     const viewer = document.querySelector("model-viewer#" + name);
     viewer.variantName = variantName;
+  }
+
+  function setMinimumRenderScale_$variableName(name, value){
+    const viewer = document.querySelector("model-viewer#" + name);
+    viewer.minimumRenderScale = value;
   }
 
   ${widget.relatedJs}
