@@ -276,11 +276,32 @@ class ModelViewerState extends State<ModelViewer> {
       maxHotspotOpacity: widget.maxHotspotOpacity,
 
       // Others
-      innerModelViewerHtml: widget.innerModelViewerHtml,
-      relatedCss: widget.relatedCss,
+      innerModelViewerHtml: _innerModelViewerHtml(),
+      relatedCss: _relatedCss(),
       relatedJs: _relatedJs(),
       id: widget.id,
     );
+  }
+
+  String? _relatedCss() {
+    if (widget.onLoading == null) {
+      return widget.relatedCss;
+    }
+
+    return '''
+.progress-bar {
+  display: none;
+  visibility: hidden;
+}
+${widget.innerModelViewerHtml ?? ''}''';
+  }
+
+  String? _innerModelViewerHtml() {
+    if (widget.onLoading == null) {
+      return widget.innerModelViewerHtml;
+    }
+
+    return '<div class="progress-bar" slot="progress-bar"></div>${widget.innerModelViewerHtml ?? ''}';
   }
 
   String _createVariableName() {

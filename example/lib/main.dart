@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
               child: ModelViewer(
                 minRenderScale: 1,
                 backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-                src: 'assets/MaterialsVariantsShoe.glb', // a bundled asset file
+                src: 'assets/single_3D.glb', // a bundled asset file
                 iosSrc:
                     'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
                 alt: "A 3D model of an astronaut",
