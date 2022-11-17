@@ -2,13 +2,10 @@
 name: model_viewer_plus_example
 description: >-
   Demonstrates how to use the ModelViewer widget.
-homepage: https://github.com/drydart/model_viewer_plus.dart/tree/master/example
-repository: https://github.com/drydart/model_viewer_plus.dart
-issue_tracker: https://github.com/drydart/model_viewer_plus.dart/issues
 dependencies:
   flutter:
     sdk: flutter
-  model_viewer_plus:
+  xetia_model_viewer:
     path: ../
   cupertino_icons: ^0.1.3
 dev_dependencies:

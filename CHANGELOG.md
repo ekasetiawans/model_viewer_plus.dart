@@ -1,3 +1,27 @@
+## 1.3.0
+
+ - **FIX**: added minRenderScale.
+ - **FIX**: web onLoading.
+ - **FIX**: webview background color.
+ - **FIX**: poster color.
+ - **FIX**: element id.
+ - **FIX**: js.
+ - **FIX**: function name.
+ - **FIX**: element view.
+ - **FIX**: variable name.
+ - **FIX**: js function name.
+ - **FIX**: unique js variable name.
+ - **FEAT**: replace default progressbar when onLoading is handled.
+ - **FEAT**: added minRenderScale.
+ - **FEAT**: support change variant.
+ - **FEAT**: added onLoading progress.
+ - **FEAT**: using transparent when posterColor.alpha is zero.
+ - **FEAT**: added --poster-color css.
+ - **FEAT**: update js function name.
+ - **FEAT**: improve model viewer controller.
+ - **FEAT**: fix web script.
+ - **FEAT**: added ModelViewerController.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

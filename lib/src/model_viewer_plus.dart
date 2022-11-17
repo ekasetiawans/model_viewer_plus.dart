@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:model_viewer_plus/src/model_viewer_controller.dart';
+import 'package:xetia_model_viewer/src/model_viewer_controller.dart';
 
 import 'model_viewer_plus_stub.dart'
     if (dart.library.io) 'model_viewer_plus_mobile.dart'

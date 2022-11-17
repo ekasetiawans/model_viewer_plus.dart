@@ -2,7 +2,7 @@
 
 /// Flutter widget for rendering interactive 3D models.
 ///
-/// To use, import `package:model_viewer_plus/model_viewer_plus.dart`.
+/// To use, import `package:xetia_model_viewer/model_viewer_plus.dart`.
 ///
 /// See also:
 ///

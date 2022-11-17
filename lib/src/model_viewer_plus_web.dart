@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:model_viewer_plus/src/model_viewer_controller.dart';
+import 'package:xetia_model_viewer/src/model_viewer_controller.dart';
 
 import 'html_builder.dart';
 import 'model_viewer_plus.dart';

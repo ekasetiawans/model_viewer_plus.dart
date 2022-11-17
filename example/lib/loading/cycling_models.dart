@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:xetia_model_viewer/model_viewer_plus.dart';
 
 void main() => runApp(MyApp());
 
