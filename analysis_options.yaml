@@ -1,9 +1,15 @@
-# See: https://dart.dev/guides/language/analysis-options
----
-include: package:pedantic/analysis_options.1.9.0.yaml
+include: package:xetia_lints/lints.yaml
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
 analyzer:
+  errors:
+    unused_import: error
+
   exclude:
-    - example/**.dart
-linter:
-  rules:
-    prefer_single_quotes: false
+    - lib/l10n/**
+    - lib/**.g.dart
+    - bin/**.dart
+    - lib/localizations/**
+    - lib/xetia_core_library.config.dart
